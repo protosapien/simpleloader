@@ -23,6 +23,7 @@ public class CassandraClient {
     public static void main(String args[]) {
 
         final int COUNT = 1000000;
+        final int TIMEDELAY =  2000;
 
         BasicConfigurator.configure();
 
@@ -49,28 +50,20 @@ public class CassandraClient {
 
             for (int i = 0; i < COUNT; i++) {
 
-
                 Timestamp randomTimeStamp = getRandomEpoch();
                 String dateString = randomTimeStamp.toString();
                 DateTime next_retry = new DateTime(randomTimeStamp).plusMinutes(10);
-
                 retryQueue = new RetryQueue();
                 retryQueue.setType(typeList.get(rand.nextInt(2500)));
                 retryQueue.setDate(dateString);
-
                 retryQueue.setNext_retry(next_retry.getMillis());
-
                 retryQueue.setKey(faker.lorem().fixedString(13));
                 retryQueue.setEvent_metadata(faker.lorem().fixedString(15));
-
                 mapper.save(retryQueue);
 
+                LOG.info("*** retryqueue with PK " + retryQueue.getType() + " inserted @ count: " + (i+1) + " ***\n");
 
-                int n = i+1;
-
-                LOG.info("retryqueue with PK " + retryQueue.getType() + " inserted @ count: " + n + '\n');
-
-                timeDelay();
+                timeDelay(TIMEDELAY);
             }
 
         }catch (InterruptedException iexp){
@@ -93,8 +86,8 @@ public class CassandraClient {
         return new Timestamp(time);
     }
 
-    private static void timeDelay() throws InterruptedException{
-        Thread.sleep(2000);
+    private static void timeDelay(int delayMillis) throws InterruptedException{
+        Thread.sleep(delayMillis);
     }
 
 }
